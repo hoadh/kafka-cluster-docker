@@ -5,11 +5,11 @@ services:
     image: confluentinc/cp-zookeeper:5.4.9
     hostname: zoo
     ports:
-      - "2181:2181"
+      - ${ZOOKEEPER_PORT}:2181
     environment:
         ZOO_MY_ID: 1
-        ZOO_PORT: 2181
-        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOO_PORT: ${ZOOKEEPER_PORT}
+        ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_PORT}
         ZOOKEEPER_TICK_TIME: 2000
         # ZOO_SERVERS: server.1=zoo:2888:3888
     volumes:
@@ -24,7 +24,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19091,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9091
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"
+      KAFKA_ZOOKEEPER_CONNECT: "zoo:${ZOOKEEPER_PORT}"
       KAFKA_BROKER_ID: 1
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
     volumes:
@@ -41,7 +41,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka2:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"
+      KAFKA_ZOOKEEPER_CONNECT: "zoo:${ZOOKEEPER_PORT}"
       KAFKA_BROKER_ID: 2
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
     volumes:
@@ -58,7 +58,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka3:19093,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"
+      KAFKA_ZOOKEEPER_CONNECT: "zoo:${ZOOKEEPER_PORT}"
       KAFKA_BROKER_ID: 3
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
     volumes:
@@ -67,11 +67,11 @@ services:
       - zoo
     # restart: on-failure
   manager:
-    image: sheepkiller/kafka-manager
+    image: ghcr.io/eshepelyuk/dckr/cmak-3.0.0.5:latest
     ports:
-      - 9000:9000
+      - ${KAFKA_MANAGER_PORT}:9000
     environment:
-      - ZK_HOSTS=zoo:2181
+      - ZK_HOSTS=zoo:${ZOOKEEPER_PORT}
     depends_on:
       - zoo
     restart: on-failure
